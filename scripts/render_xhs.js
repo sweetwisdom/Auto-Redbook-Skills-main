@@ -801,6 +801,7 @@ function generateCardHtml(
  * 渲染 HTML 为图片
  */
 async function renderHtmlToImage(
+    browser,
     htmlContent,
     outputPath,
     width,
@@ -808,25 +809,29 @@ async function renderHtmlToImage(
     mode,
     maxHeight,
     dpr,
+    baseDirForRelativeAssets,
 ) {
-    const browser = await chromium.launch({
-        channel: "chrome",
-    });
     const viewportHeight = mode !== "dynamic" ? height : maxHeight;
     const page = await browser.newPage({
         viewport: { width, height: viewportHeight },
         deviceScaleFactor: dpr,
     });
 
-    const htmlPath = outputPath.replace(/\.png$/i, ".html");
-    if (fs.existsSync(htmlPath)) {
-        await page.goto(pathToFileURL(path.resolve(htmlPath)).href, {
-            waitUntil: "networkidle",
-        });
-    } else {
-        await page.setContent(htmlContent);
-        await page.waitForLoadState("networkidle");
-    }
+    const baseHref = baseDirForRelativeAssets
+        ? pathToFileURL(path.resolve(baseDirForRelativeAssets)).href.replace(
+              /\/?$/,
+              "/",
+          )
+        : "";
+    const htmlWithBase = baseHref
+        ? htmlContent.replace(
+              /<head(\s[^>]*)?>/i,
+              (m) => `${m}\n    <base href="${baseHref}">`,
+          )
+        : htmlContent;
+
+    await page.setContent(htmlWithBase);
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(500);
     await page.evaluate(async () => {
         if (window.Iconify && typeof window.Iconify.scan === "function") {
@@ -897,9 +902,33 @@ async function renderHtmlToImage(
         type: "png",
     });
 
-    await browser.close();
+    await page.close();
     console.log(`  ✅ 已生成: ${outputPath} (${width}x${actualHeight})`);
     return actualHeight;
+}
+
+/**
+ * 并发池：最多同时执行 N 个任务
+ */
+async function runPool(items, concurrency, worker) {
+    const n = Math.max(1, Math.floor(concurrency || 1));
+    const results = new Array(items.length);
+    let nextIndex = 0;
+
+    async function runner() {
+        while (true) {
+            const i = nextIndex++;
+            if (i >= items.length) return;
+            results[i] = await worker(items[i], i);
+        }
+    }
+
+    const runners = Array.from(
+        { length: Math.min(n, items.length) },
+        () => runner(),
+    );
+    await Promise.all(runners);
+    return results;
 }
 
 /**
@@ -950,6 +979,12 @@ async function renderMarkdownToCards(options) {
 
     console.log(`  📄 检测到 ${totalCards} 张正文卡片`);
 
+    const browser = emitPng
+        ? await chromium.launch({
+              channel: "chrome",
+          })
+        : null;
+
     // 生成封面
     if (metadata.emoji || metadata.title) {
         console.log("  📷 生成封面...");
@@ -970,6 +1005,7 @@ async function renderMarkdownToCards(options) {
         if (emitPng) {
             const coverPath = path.join(outputDir, "cover.png");
             await renderHtmlToImage(
+                browser,
                 coverHtml,
                 coverPath,
                 width,
@@ -977,38 +1013,67 @@ async function renderMarkdownToCards(options) {
                 "separator",
                 maxHeight,
                 dpr,
+                outputDir,
             );
         }
     }
 
     // 生成正文卡片
-    for (let i = 0; i < cardContents.length; i++) {
-        const content = cardContents[i];
-        console.log(`  📷 生成卡片 ${i + 1}/${totalCards}...`);
-        const cardHtml = generateCardHtml(
-            content,
-            theme,
-            i + 1,
-            totalCards,
-            width,
-            height,
-            mode,
-            markdownDir,
-            outputDir,
-            footerConfig,
-            imageMaxWidth,
-            "",
-        );
-        if (emitHtml) {
+    const cards = cardContents.map((content, i) => ({
+        content,
+        index: i,
+        pageNumber: i + 1,
+        totalPages: totalCards,
+    }));
+
+    // 先生成 HTML（如果需要），避免并发时打印交错影响观感，同时便于调试
+    if (emitHtml) {
+        for (const card of cards) {
+            const cardHtml = generateCardHtml(
+                card.content,
+                theme,
+                card.pageNumber,
+                card.totalPages,
+                width,
+                height,
+                mode,
+                markdownDir,
+                outputDir,
+                footerConfig,
+                imageMaxWidth,
+                "",
+            );
             fs.writeFileSync(
-                path.join(outputDir, `card_${i + 1}.html`),
+                path.join(outputDir, `card_${card.pageNumber}.html`),
                 cardHtml,
                 "utf-8",
             );
         }
-        if (emitPng) {
-            const cardPath = path.join(outputDir, `card_${i + 1}.png`);
+    }
+
+    if (emitPng) {
+        const concurrency = 3;
+        await runPool(cards, concurrency, async (card) => {
+            console.log(
+                `  📷 生成卡片 ${card.pageNumber}/${totalCards}... (并行x${concurrency})`,
+            );
+            const cardHtml = generateCardHtml(
+                card.content,
+                theme,
+                card.pageNumber,
+                card.totalPages,
+                width,
+                height,
+                mode,
+                markdownDir,
+                outputDir,
+                footerConfig,
+                imageMaxWidth,
+                "",
+            );
+            const cardPath = path.join(outputDir, `card_${card.pageNumber}.png`);
             await renderHtmlToImage(
+                browser,
                 cardHtml,
                 cardPath,
                 width,
@@ -1016,8 +1081,13 @@ async function renderMarkdownToCards(options) {
                 mode,
                 maxHeight,
                 dpr,
+                outputDir,
             );
-        }
+        });
+    }
+
+    if (browser) {
+        await browser.close();
     }
 
     const emitted = [

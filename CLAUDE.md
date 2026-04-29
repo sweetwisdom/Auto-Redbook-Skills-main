@@ -40,6 +40,11 @@ npm run install-browsers
 - `auto-plot` - 自动根据高度切分
 - `dynamic` - 动态调整高度
 
+### 性能说明
+
+- PNG 渲染会复用同一个 Chromium 实例
+- 正文卡片 PNG 渲染默认 **最多 3 张并行**（日志中会显示 `并行x3`）
+
 ## 架构说明
 
 - **渲染核心**：`scripts/render_xhs.js` 使用 Playwright + marked 解析 Markdown 并渲染为图片

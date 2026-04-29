@@ -51,6 +51,26 @@ subtitle: "封面副标题（≤15字）"
 
 ### 第三步：渲染图片卡片
 
+推荐使用 Node.js 版本（支持 `charged-official` 等主题、HTML/PNG 输出开关、PNG 并行渲染）：
+
+```bash
+node scripts/render_xhs.js <markdown_file> [options]
+```
+
+常用示例：
+
+```bash
+# 默认（PNG 开启，HTML 关闭；正文卡片 PNG 默认最多 3 张并行）
+node scripts/render_xhs.js content.md
+
+# 只输出 HTML（不截图）
+node scripts/render_xhs.js content.md --emit-html --no-emit-png
+```
+
+---
+
+兼容：也可以使用 Python 版本：
+
 ```bash
 python scripts/render_xhs.py <markdown_file> [options]
 ```

@@ -17,7 +17,7 @@
 
 跟你的 Agent 说：
 
-> 拉取下面的项目，安装其中的技能：https://github.com/comeonzhj/Auto-Redbook-Skills
+> 拉取下面的项目，安装其中的技能：https://github.com/sweetwisdom/Auto-Redbook-Skills
 
 ### 方式三：手动安装
 

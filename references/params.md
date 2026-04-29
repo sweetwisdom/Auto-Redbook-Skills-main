@@ -1,5 +1,42 @@
 # 参数参考文档
 
+## 渲染脚本（render_xhs.js，Node.js）
+
+```bash
+node scripts/render_xhs.js <markdown_file> [options]
+```
+
+### 参数列表
+
+| 参数 | 简写 | 说明 | 默认值 |
+|---|---|---|---|
+| `--output-dir` | `-o` | 输出目录 | 当前工作目录 |
+| `--theme` | `-t` | 排版主题 | `default` |
+| `--mode` | `-m` | 分页模式 | `separator` |
+| `--width` | `-w` | 图片宽度（px） | `1080` |
+| `--height` | | 图片高度（`dynamic` 下为最小高度） | `1440` |
+| `--max-height` | | `dynamic` 模式下的最大高度 | `2160` |
+| `--dpr` | | 设备像素比（清晰度） | `2` |
+| `--emit-html` / `--no-emit-html` | | 是否输出 HTML | 关闭 |
+| `--emit-png` / `--no-emit-png` | | 是否输出 PNG | 开启 |
+
+### 性能说明
+
+- PNG 渲染会复用同一个 Chromium 实例（避免逐张启动浏览器）
+- 正文卡片 PNG 渲染默认 **最多 3 张并行**（日志中会出现 `并行x3`）
+
+### 常用命令示例
+
+```bash
+# 默认（PNG 开启，HTML 关闭）
+node scripts/render_xhs.js demos/content.md -o out
+
+# 只输出 HTML（不截图）
+node scripts/render_xhs.js demos/content.md -o out-html --emit-html --no-emit-png
+```
+
+---
+
 ## 渲染脚本（render_xhs.py）
 
 ```bash

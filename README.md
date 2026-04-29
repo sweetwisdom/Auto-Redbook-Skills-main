@@ -36,7 +36,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/comeonzhj/Auto-Redbook-Skills.git
+git clone https://github.com/sweetwisdom/Auto-Redbook-Skills.git
 cd Auto-Redbook-Skills
 ```
 
@@ -80,6 +80,9 @@ npm i
 > 生成结果（可通过参数开关控制）：
 > - PNG：`cover.png`、`card_1.png`、`card_2.png`...
 > - HTML：`cover.html`、`card_1.html`、`card_2.html`...
+>
+> 性能说明：
+> - PNG 渲染会复用同一个 Chromium 实例，并对正文卡片 **默认最多 3 张并行** 渲染（日志中会出现 `并行x3`）
 
 ---
 
@@ -95,6 +98,12 @@ node scripts/render_xhs.js demos/content.md -t neo-brutalism  -o out-neo-brutali
 
 # 暖黄「充电」参考主题 + 中部 Logo（见 demos/charged-official.md）
 node scripts/render_xhs.js demos/charged-official.md -t charged-official -o out-charged
+
+# 只要 HTML（不截图）
+node scripts/render_xhs.js demos/content.md -o out-html --emit-html --no-emit-png
+
+# 只要 PNG（默认就是这样）
+node scripts/render_xhs.js demos/content.md -o out-png --no-emit-html
 ```
 
 ### Markdown Frontmatter（页脚与 Logo）
@@ -196,7 +205,7 @@ Auto-Redbook-Skills/
 
 - [Playwright](https://playwright.dev/) - 浏览器自动化渲染
 - [Marked](https://marked.js.org/) - Markdown 解析
-- [xhs](https://github.com/ReaJason/xhs) - 小红书 API 客户端
+- [Auto-Redbook](https://github.com/comeonzhj/Auto-Redbook-Skills) - 原始参考
 - **Cursor** - 本次重构过程中提供了极大帮助 ❤️
 
 ---
