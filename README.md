@@ -1,40 +1,8 @@
-## 📕 Auto-Redbook-Skills（已重构版）
-
-### ⚠️ 使用此工具前情确保已悉知官方 3 月 10 日发布的公告
-
-公告地址：[关于打击AI托管运营账号的治理公告](http://xhslink.com/o/7WxTddvbmTu)
-
-### 方式一：Claude Code Plugin 安装（推荐）
-
-```bash
-# 添加本仓库为 marketplace
-/plugin marketplace add comeonzhj/Auto-Redbook-Skills
-
-# 安装插件
-/plugin install auto-redbook-skills@comeonzhj-Auto-Redbook-Skills
-```
-
-安装后运行 `/reload-plugins` 即可使用。
-
-### 方式二：一句话安装
-
-跟你的 Agent 说：
-
-> 拉取下面的项目，安装其中的技能：https://github.com/comeonzhj/Auto-Redbook-Skills
-
-### 方式三：手动安装
-
-详见下方[使用方式总览](#-使用方式总览)。
-
----
+## 📕 Auto-Redbook-Skills
 
 
-> 自动撰写小红书笔记、生成多主题卡片、可选自动发布的 Skills  
-> 当前版本对渲染脚本和样式系统做了**一次完整重构**，感谢 Cursor 的辅助开发 🙌
 
----
-
-## ✨ 本次重构亮点
+## ✨ 项目亮点
 
 - **🎨 8 套主题皮肤**：默认简约灰 + Playful Geometric / Neo-Brutalism / Botanical / Professional / Retro / Terminal / Sketch
 - **📐 4 种分页模式**：
@@ -47,7 +15,7 @@
 
 ---
 
-## 🖼 主题效果示例
+## 主题效果示例
 
 > 所有示例均为 1080×1440px，小红书推荐 3:4 比例
 > 更多示例去 [demo](/demos) 中查看  
@@ -80,42 +48,21 @@ cd Auto-Redbook-Skills
 
 ### 2. 安装依赖
 
-**Python：**
 
-```bash
-pip install -r requirements.txt
-playwright install chromium
-```
 
 **Node.js：**
 
 ```bash
-npm install
-npx playwright install chromium
+cd ./scripts
+npm i
 ```
 
 ---
 
-## 🎨 渲染图片（Python）
 
-核心脚本：`scripts/render_xhs.py`
+## 🎨 渲染图片（Node.js）
 
-```bash
-# 最简单用法（默认主题 + 手动分页）
-python scripts/render_xhs.py demos/content.md
-
-# 使用自动分页（推荐：内容长短难控）
-python scripts/render_xhs.py demos/content.md -m auto-split
-
-# 使用固定尺寸自动缩放（auto-fit）
-python scripts/render_xhs.py demos/content_auto_fit.md -m auto-fit
-
-# 切换主题（例如 Playful Geometric）
-python scripts/render_xhs.py demos/content.md -t playful-geometric -m auto-split
-
-# 自定义尺寸和像素比
-python scripts/render_xhs.py demos/content.md -t retro -m dynamic --width 1080 --height 1440 --max-height 2160 --dpr 2
-```
+脚本：`scripts/render_xhs.js`：
 
 **主要参数：**
 
@@ -132,10 +79,6 @@ python scripts/render_xhs.py demos/content.md -t retro -m dynamic --width 1080 -
 
 ---
 
-## 🎨 渲染图片（Node.js）
-
-脚本：`scripts/render_xhs.js`，参数与 Python 基本一致：
-
 ```bash
 # 默认主题 + 手动分页
 node scripts/render_xhs.js demos/content.md
@@ -146,43 +89,9 @@ node scripts/render_xhs.js demos/content.md -t terminal -m auto-split
 
 ---
 
-## 📤 发布到小红书
 
-### 1. 配置 Cookie
 
-```bash
-cp env.example.txt .env
-```
-
-编辑 `.env`：
-
-```env
-XHS_COOKIE=your_cookie_string_here
-```
-
-> 获取方式：浏览器登录小红书 → F12 → Network → 任意请求的 Cookie 头，复制整串。
-
-### 2. 手动发布（可选）
-
-```bash
-python scripts/publish_xhs.py \
-  --title "笔记标题" \
-  --desc "笔记描述内容" \
-  --images cover.png card_1.png card_2.png
-```
-
-**可选参数：**
-
-| 参数 | 说明 |
-|------|------|
-| `--public` | 公开发布（默认仅自己可见） |
-| `--post-time "2024-01-01 12:00:00"` | 定时发布 |
-| `--api-mode` | 通过 xhs-api 服务发布 |
-| `--dry-run` | 仅验证，不实际发布 |
-
----
-
-## 📁 项目结构（重构后）
+## 📁 项目结构
 
 ```bash
 Auto-Redbook-Skills/
@@ -216,20 +125,11 @@ Auto-Redbook-Skills/
 │   ├── Sketch/
 │   └── terminal/
 └── scripts/
-    ├── render_xhs.py     # Python 渲染脚本（8 主题 + 4 分页模式）
-    ├── render_xhs_v2.py  # Python 渲染脚本 V2（7 渐变色彩风格）
-    ├── render_xhs.js     # Node.js 渲染脚本
-    └── publish_xhs.py    # 小红书发布脚本（默认仅自己可见）
+    ├── render_xhs.js     
+
 ```
 
----
 
-## ⚠️ 注意事项
-
-1. **Cookie 安全**：不要把 `.env` 提交到 Git 或共享出去。
-2. **Cookie 有效期**：过期后发布失败是正常现象，重新抓一次 Cookie 即可。
-3. **发布频率**：避免短时间内高频发布，以免触发平台风控。
-4. **图片尺寸**：默认 1080×1440px，符合小红书推荐比例。
 
 ---
 
