@@ -85,6 +85,9 @@ node scripts/render_xhs.js demos/content.md
 
 # 指定主题 + 自动分页
 node scripts/render_xhs.js demos/content.md -t terminal -m auto-split
+
+# 指定主题 + 输出
+node scripts/render_xhs.js demos/content.md -t neo-brutalism  -o out-neo-brutalism 
 ```
 
 ---
