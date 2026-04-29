@@ -2,9 +2,14 @@
 emoji: "🚀"
 title: "5个效率神器"
 subtitle: "让工作效率翻倍"
-author: "你的名字"
-slogan: "@xxx 和我一起进步"
+author: "@我们爱学习"
+slogan: "和我一起进步"
 img_max_width: 80
+logo:
+  icon: "devicon:google"
+  label: "Oiioii"
+  subtext: "给你配齐导演、编剧、画师，一人就是一家动画公司！"
+  size: 200
 ---
 
 # 神器一：Notion 📝

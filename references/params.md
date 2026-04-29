@@ -30,6 +30,7 @@ python scripts/render_xhs.py <markdown_file> [options]
 | `professional` | 专业商务 | 简洁商务蓝 |
 | `retro` | 复古怀旧 | 暖色复古感 |
 | `terminal` | 终端命令行 | 深色代码终端风格 |
+| `charged-official` | 充电参考风 | 暖黄渐变、粗黑标题、可配中部 Logo（Iconify / 本地图） |
 
 ### 分页模式（`--mode`）
 

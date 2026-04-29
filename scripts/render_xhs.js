@@ -47,6 +47,7 @@ const AVAILABLE_THEMES = [
     "retro",
     "terminal",
     "sketch",
+    "charged-official",
 ];
 
 // 分页模式
@@ -62,6 +63,8 @@ const THEME_BACKGROUNDS = {
     retro: "linear-gradient(135deg, #D35400 0%, #F39C12 100%)",
     terminal: "linear-gradient(135deg, #0D1117 0%, #161B22 100%)",
     sketch: "linear-gradient(135deg, #555555 0%, #888888 100%)",
+    "charged-official":
+        "linear-gradient(180deg, #fb923c 0%, #fef3c7 45%, #fffbeb 100%)",
 };
 
 // 封面标题文字渐变（随主题变化）
@@ -74,6 +77,8 @@ const THEME_TITLE_GRADIENTS = {
     retro: "linear-gradient(180deg, #8B4513 0%, #D35400 100%)",
     terminal: "linear-gradient(180deg, #39D353 0%, #58A6FF 100%)",
     sketch: "linear-gradient(180deg, #111827 0%, #6B7280 100%)",
+    "charged-official":
+        "linear-gradient(180deg, #431407 0%, #ea580c 55%, #fbbf24 100%)",
 };
 
 /**
@@ -264,6 +269,117 @@ function parseImageMaxWidth(metadata) {
 }
 
 /**
+ * 本地资源路径解析为相对 outputDir 的路径（用于 logo 等）
+ */
+function resolveLocalAssetToRelativeSrc(rawSrc, markdownDir, outputDir) {
+    const src = String(rawSrc || "").trim();
+    if (!src || isExternalOrInlineUrl(src)) {
+        return src;
+    }
+    const absolutePath = path.isAbsolute(src)
+        ? src
+        : path.resolve(markdownDir, src);
+    return path.relative(outputDir, absolutePath).split(path.sep).join("/");
+}
+
+/**
+ * 解析 logo.size，支持 `200`、误写 `200ss` 等
+ */
+function parseLogoSize(raw) {
+    if (raw === undefined || raw === null || raw === "") {
+        return 220;
+    }
+    if (typeof raw === "number" && Number.isFinite(raw)) {
+        return Math.max(80, Math.min(400, Math.round(raw)));
+    }
+    const digits = String(raw).replace(/[^\d.]/g, "");
+    const n = parseFloat(digits);
+    if (!Number.isFinite(n)) {
+        return 220;
+    }
+    return Math.max(80, Math.min(400, Math.round(n)));
+}
+
+/**
+ * 解析 frontmatter 中的 logo（img 优先于 icon）
+ */
+function parseLogoConfig(metadata) {
+    const raw = metadata.logo;
+    if (!raw || typeof raw !== "object") {
+        return null;
+    }
+
+    const img =
+        raw.img != null && String(raw.img).trim() !== ""
+            ? String(raw.img).trim()
+            : "";
+
+    const hasExplicitIcon =
+        Object.prototype.hasOwnProperty.call(raw, "icon") &&
+        raw.icon != null &&
+        String(raw.icon).trim() !== "";
+
+    const icon = hasExplicitIcon ? String(raw.icon).trim() : "mdi:flash";
+
+    const label = raw.label != null ? String(raw.label).trim() : "";
+    const subtext = raw.subtext != null ? String(raw.subtext).trim() : "";
+
+    const size = parseLogoSize(raw.size);
+
+    const meaningful =
+        !!img ||
+        hasExplicitIcon ||
+        label !== "" ||
+        subtext !== "";
+
+    if (!meaningful) {
+        return null;
+    }
+
+    return { img, icon, size, label, subtext };
+}
+
+/**
+ * 生成中部品牌区 HTML（Iconify 或本地图，img 优先）
+ */
+function buildLogoBlockHtml(logo, markdownDir, outputDir) {
+    if (!logo) {
+        return "";
+    }
+
+    const w = logo.size;
+    let markInner = "";
+    if (logo.img) {
+        const rel = resolveLocalAssetToRelativeSrc(
+            logo.img,
+            markdownDir,
+            outputDir,
+        );
+        markInner = `<img class="logo-img" src="${escapeHtml(rel)}" alt="" />`;
+    } else {
+        const innerPx = Math.max(96, Math.round(w * 0.92));
+        markInner = `<iconify-icon icon="${escapeHtml(
+            logo.icon,
+        )}" width="${innerPx}" height="${innerPx}" style="width:${innerPx}px;height:${innerPx}px;display:block;margin:0;padding:0;"></iconify-icon>`;
+    }
+
+    const lines = [
+        '<section class="card-logo-block">',
+        `<div class="logo-mark" style="width:${w}px;height:${w}px;min-width:${w}px;min-height:${w}px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">`,
+        markInner,
+        "</div>",
+    ];
+    if (logo.label) {
+        lines.push(`<p class="logo-label">${escapeHtml(logo.label)}</p>`);
+    }
+    if (logo.subtext) {
+        lines.push(`<p class="logo-subtext">${escapeHtml(logo.subtext)}</p>`);
+    }
+    lines.push("</section>");
+    return lines.join("\n");
+}
+
+/**
  * 按分隔符拆分内容
  */
 function splitContentBySeparator(body) {
@@ -287,9 +403,73 @@ function loadThemeCss(theme) {
 }
 
 /**
+ * 封面页中部 Logo 区域样式（与正文 .card-logo-block 一致）
+ */
+function getCoverLogoBlockCss(width) {
+    const mb = Math.floor(width * 0.03);
+    return `
+        .cover-inner .cover-logo-slot {
+            flex-shrink: 0;
+            margin-bottom: ${mb}px;
+        }
+        .cover-inner .card-logo-block {
+            margin: 0 auto ${mb}px auto;
+            max-width: 88%;
+            text-align: center;
+        }
+        .cover-inner .card-logo-block .logo-mark {
+            margin: 0 auto ${Math.floor(width * 0.02)}px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: linear-gradient(145deg, #0f172a 0%, #020617 100%);
+            border-radius: 42px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+        }
+        .cover-inner .card-logo-block .logo-mark iconify-icon {
+            display: block !important;
+            margin: 0 auto !important;
+            flex-shrink: 0 !important;
+            max-width: none !important;
+            max-height: none !important;
+            box-sizing: border-box !important;
+        }
+        .cover-inner .card-logo-block .logo-img {
+            width: 68%;
+            height: 68%;
+            object-fit: contain;
+            display: block;
+            border-radius: 12px;
+        }
+        .cover-inner .card-logo-block .logo-label {
+            font-size: ${Math.floor(width * 0.085)}px;
+            font-weight: 900;
+            color: #030712;
+            margin: ${Math.floor(width * 0.02)}px 0 0 0;
+            line-height: 1.15;
+        }
+        .cover-inner .card-logo-block .logo-subtext {
+            font-size: ${Math.floor(width * 0.038)}px;
+            font-weight: 550;
+            color: #374151;
+            margin: ${Math.floor(width * 0.022)}px auto 0 auto;
+            max-width: 92%;
+            line-height: 1.5;
+        }
+    `;
+}
+
+/**
  * 生成封面 HTML
  */
-function generateCoverHtml(metadata, theme, width, height) {
+function generateCoverHtml(
+    metadata,
+    theme,
+    width,
+    height,
+    logoBlockHtml = "",
+) {
     const emoji = metadata.emoji || "📝";
     let title = metadata.title || "标题";
     let subtitle = metadata.subtitle || "";
@@ -297,9 +477,29 @@ function generateCoverHtml(metadata, theme, width, height) {
     if (title.length > 15) title = title.slice(0, 15);
     if (subtitle.length > 15) subtitle = subtitle.slice(0, 15);
 
+    const hasCoverLogo = String(logoBlockHtml || "").trim().length > 0;
+
     const bg = THEME_BACKGROUNDS[theme] || THEME_BACKGROUNDS["default"];
     const titleBg =
         THEME_TITLE_GRADIENTS[theme] || THEME_TITLE_GRADIENTS["default"];
+    const chargedOfficialCover = theme === "charged-official";
+    const coverInnerBg = chargedOfficialCover
+        ? "linear-gradient(180deg, #fff7ed 0%, #fde68a 52%, #fffbeb 100%)"
+        : "#F3F3F3";
+    const chargedOverlay = chargedOfficialCover
+        ? `
+        .cover-container::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 18% 28%, rgba(251, 191, 36, 0.22) 0%, transparent 42%),
+                radial-gradient(circle at 82% 18%, rgba(245, 158, 11, 0.18) 0%, transparent 38%),
+                repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.08) 0px, rgba(255, 255, 255, 0.08) 2px, transparent 2px, transparent 80px);
+            pointer-events: none;
+        }
+        `
+        : "";
 
     return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -326,6 +526,7 @@ function generateCoverHtml(metadata, theme, width, height) {
             position: relative;
             overflow: hidden;
         }
+        ${chargedOverlay}
         
         .cover-inner {
             position: absolute;
@@ -333,7 +534,7 @@ function generateCoverHtml(metadata, theme, width, height) {
             height: ${Math.floor(height * 0.91)}px;
             left: ${Math.floor(width * 0.06)}px;
             top: ${Math.floor(height * 0.045)}px;
-            background: #F3F3F3;
+            background: ${coverInnerBg};
             border-radius: 25px;
             display: flex;
             flex-direction: column;
@@ -354,10 +555,15 @@ function generateCoverHtml(metadata, theme, width, height) {
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            flex: 1;
+            ${hasCoverLogo ? "flex-shrink: 0;" : "flex: 1;"}
             display: flex;
             align-items: flex-start;
             word-break: break-all;
+        }
+        
+        .cover-fill-spacer {
+            flex: 1;
+            min-height: 0;
         }
         
         .cover-subtitle {
@@ -365,15 +571,26 @@ function generateCoverHtml(metadata, theme, width, height) {
             font-size: ${Math.floor(width * 0.067)}px;
             line-height: 1.4;
             color: #000000;
-            margin-top: auto;
+            margin-top: ${hasCoverLogo ? "0" : "auto"};
         }
+        ${hasCoverLogo ? getCoverLogoBlockCss(width) : ""}
     </style>
+    ${
+        hasCoverLogo
+            ? '<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>'
+            : ""
+    }
 </head>
 <body>
     <div class="cover-container">
         <div class="cover-inner">
             <div class="cover-emoji">${emoji}</div>
             <div class="cover-title">${title}</div>
+            ${
+                hasCoverLogo
+                    ? `<div class="cover-logo-slot">${logoBlockHtml}</div><div class="cover-fill-spacer"></div>`
+                    : ""
+            }
             <div class="cover-subtitle">${subtitle}</div>
         </div>
     </div>
@@ -396,6 +613,7 @@ function generateCardHtml(
     outputDir,
     footerConfig = {},
     imageMaxWidth = "80%",
+    logoBlockHtml = "",
 ) {
     const htmlContent = rewriteImageSrcForOutputDir(
         marked.parse(content),
@@ -545,6 +763,7 @@ function generateCardHtml(
 <body>
     <div class="card-container">
         <div class="card-inner">
+            ${logoBlockHtml}
             <div class="card-content">
                 <div class="card-content-scale">
                     ${htmlContent}
@@ -699,6 +918,12 @@ async function renderMarkdownToCards(options) {
         author: metadata.author || "",
         slogan: metadata.slogan || "",
     };
+    const logoConfig = parseLogoConfig(metadata);
+    const logoBlockHtml = buildLogoBlockHtml(
+        logoConfig,
+        markdownDir,
+        outputDir,
+    );
 
     // 分割内容
     const cardContents = splitContentBySeparator(body);
@@ -709,7 +934,13 @@ async function renderMarkdownToCards(options) {
     // 生成封面
     if (metadata.emoji || metadata.title) {
         console.log("  📷 生成封面...");
-        const coverHtml = generateCoverHtml(metadata, theme, width, height);
+        const coverHtml = generateCoverHtml(
+            metadata,
+            theme,
+            width,
+            height,
+            logoBlockHtml,
+        );
         fs.writeFileSync(path.join(outputDir, "cover.html"), coverHtml, "utf-8");
         const coverPath = path.join(outputDir, "cover.png");
         await renderHtmlToImage(
@@ -739,6 +970,7 @@ async function renderMarkdownToCards(options) {
             outputDir,
             footerConfig,
             imageMaxWidth,
+            "",
         );
         fs.writeFileSync(
             path.join(outputDir, `card_${i + 1}.html`),

@@ -4,7 +4,7 @@
 
 ## ✨ 项目亮点
 
-- **🎨 8 套主题皮肤**：默认简约灰 + Playful Geometric / Neo-Brutalism / Botanical / Professional / Retro / Terminal / Sketch
+- **🎨 9 套主题皮肤**：默认简约灰 + Playful Geometric / Neo-Brutalism / Botanical / Professional / Retro / Terminal / Sketch / Charged Official（暖黄「充电」参考风）
 - **📐 4 种分页模式**：
   - `separator`：按 `---` 分隔手动分页
   - `auto-fit`：固定尺寸，自动整体缩放内容，避免溢出/大面积留白
@@ -68,7 +68,7 @@ npm i
 
 | 参数 | 简写 | 说明 |
 |------|------|------|
-| `--theme` | `-t` | 主题：`default`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`、`sketch` |
+| `--theme` | `-t` | 主题：`default`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`、`sketch`、`charged-official` |
 | `--mode` | `-m` | 分页模式：`separator` / `auto-fit` / `auto-split` / `dynamic` |
 | `--width` | `-w` | 图片宽度（默认 1080） |
 | `--height` |  | 图片高度（默认 1440，`dynamic` 为最小高度） |
@@ -89,10 +89,13 @@ node scripts/render_xhs.js demos/content.md
 node scripts/render_xhs.js demos/content.md -t terminal -m auto-split
 
 # 指定主题 + 输出
-node scripts/render_xhs.js demos/content.md -t neo-brutalism  -o out-neo-brutalism 
+node scripts/render_xhs.js demos/content.md -t neo-brutalism  -o out-neo-brutalism
+
+# 暖黄「充电」参考主题 + 中部 Logo（见 demos/charged-official.md）
+node scripts/render_xhs.js demos/charged-official.md -t charged-official -o out-charged
 ```
 
-### Markdown Frontmatter（页脚配置）
+### Markdown Frontmatter（页脚与 Logo）
 
 ```yaml
 ---
@@ -102,19 +105,35 @@ subtitle: "封面副标题"
 author: "你的名字"
 slogan: "@xxx 和我一起进步"
 img_max_width: 80
+logo:
+  icon: "mdi:lightning-bolt"
+  img: "./cover-avatar.png"
+  label: "品牌名"
+  subtext: "副标题或一句话介绍"
+  size: 220
 ---
 ```
 
 - `author`：正文页脚左侧文案
 - `slogan`：正文页脚右侧文案
 - `img_max_width`：正文图片最大宽度百分比（默认 `80`，可写 `70` 或 `70%`）
+- `logo`：可选。中部品牌区 **仅出现在封面**（正文卡片不重复显示）
+  - `logo.icon`：Iconify 图标名（默认 `mdi:flash`）
+  - `logo.img`：本地图片路径（**相对 Markdown 文件目录**；任意常见图片格式）
+  - **优先级**：同时配置时 **`logo.img` 优先于 `logo.icon`**
+  - `logo.label` / `logo.subtext`：主标题与说明文案（可选）
+  - `logo.size`：中部图标区域边长（像素，默认 `220`）
 - 页脚中间自动显示页码（例如 `1/4`），封面不显示页脚
 
 ### Markdown 图片路径规则
 
-- Markdown 中图片支持正常渲染
-- 相对路径按 `--output-dir` 作为基准目录解析
-- 例如：`![示例](images/demo.png)` 会解析为 `<output-dir>/images/demo.png`
+- Markdown 与 `logo.img` 中的相对路径先相对 **Markdown 文件所在目录** 解析为真实文件，再在输出 HTML 中转成相对 **`--output-dir`** 的路径（便于与 `file://` 打开的中间 HTML 一致）
+- 例如 Markdown 在 `demos/a.md`，图片为 `demos/.imgs/x.png` 时写成 `![示例](./.imgs/x.png)` 
+
+### 主题 `charged-official`
+
+- 接近「暖黄渐变 + 粗黑标题」的参考视觉；封面为同系近似渐变（高保真主要针对正文卡片）
+- 示例文件：[demos/charged-official.md](demos/charged-official.md)（Iconify Logo）、[demos/charged-official-logo-img.md](demos/charged-official-logo-img.md)（本地图 Logo）
 
 ### Iconify 图标支持
 
@@ -153,7 +172,7 @@ Auto-Redbook-Skills/
 │   ├── professional.css
 │   ├── retro.css
 │   ├── terminal.css
-│   └── sketch.css
+│   └── charged-official.css
 ├── demos/                # 各主题示例渲染结果
 │   ├── content.md
 │   ├── content_auto_fit.md

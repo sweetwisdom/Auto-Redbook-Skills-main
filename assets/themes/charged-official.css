@@ -1,0 +1,150 @@
+/* ============================================
+   Charged Official - 「充电」参考风格（正文高保真）
+   暖黄渐变卡片、粗黑标题、中部品牌区
+   ============================================ */
+
+.card-inner {
+  background: linear-gradient(180deg, #fef9e8 0%, #ffffff 55%, #fffef9 100%) !important;
+  border-radius: 28px !important;
+}
+
+.card-content {
+  color: #111827 !important;
+  background-color: transparent !important;
+  font-size: 40px !important;
+  line-height: 1.75 !important;
+}
+
+/* 正文标题：粗黑 */
+.card-content h1 {
+  font-size: 52px !important;
+  font-weight: 900 !important;
+  color: #111827 !important;
+  margin-bottom: 28px !important;
+  letter-spacing: 0.02em;
+}
+
+.card-content h2 {
+  font-size: 42px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  margin: 36px 0 20px 0 !important;
+}
+
+.card-content h3 {
+  font-size: 38px !important;
+  font-weight: 700 !important;
+  color: #374151 !important;
+  margin: 28px 0 16px 0 !important;
+}
+
+.card-content p {
+  margin-bottom: 28px !important;
+  color: #1f2937 !important;
+}
+
+.card-content strong,
+.card-content b {
+  font-weight: 800 !important;
+  color: #000000 !important;
+}
+
+.card-content em,
+.card-content i {
+  color: #ca8a04 !important;
+  font-style: normal !important;
+  font-weight: 600 !important;
+}
+
+.card-content a {
+  color: #b45309 !important;
+  border-bottom-color: #fbbf24 !important;
+}
+
+.card-content ul,
+.card-content ol {
+  margin: 24px 0 !important;
+  padding-left: 48px !important;
+}
+
+.card-content blockquote {
+  border-left-width: 6px !important;
+  border-left-color: #fbbf24 !important;
+  background: rgba(254, 243, 199, 0.45) !important;
+  color: #4b5563 !important;
+}
+
+.card-content code {
+
+  color: #92400e !important;
+}
+
+.card-content pre {
+  background: #1c1917 !important;
+  color: #fafaf9 !important;
+  background-color: #000000; 
+  border: 5px solid #000000;
+  box-shadow: 10px 10px 0 #ff4757;
+  overflow-x: visible;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+/* 中部品牌区 */
+.card-logo-block {
+  flex-shrink: 0;
+  text-align: center;
+  margin: 8px auto 44px auto;
+  max-width: 88%;
+}
+
+.card-logo-block .logo-mark {
+  width: clamp(140px, 36vw, 280px);
+  height: clamp(140px, 36vw, 280px);
+  margin: 0 auto 28px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background: linear-gradient(145deg, #0f172a 0%, #020617 100%);
+  border-radius: 42px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+}
+
+/* 尺寸由内联 px 控制，避免百分比把 devicon 等压成小图 */
+.card-logo-block .logo-mark iconify-icon {
+  display: block !important;
+  margin: 0 auto !important;
+  flex-shrink: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+}
+
+.card-logo-block .logo-img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+  display: block;
+  border-radius: 12px;
+}
+
+.card-logo-block .logo-label {
+  font-size: 72px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em;
+  color: #030712 !important;
+  margin: 0 !important;
+  line-height: 1.15 !important;
+}
+
+.card-logo-block .logo-subtext {
+  font-size: 34px !important;
+  font-weight: 550 !important;
+  color: #374151 !important;
+  margin: 22px auto 0 auto !important;
+  max-width: 92%;
+  line-height: 1.55 !important;
+}

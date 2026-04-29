@@ -30,7 +30,7 @@ npm run install-browsers
 | `--width` | `-w` | 图片宽度 | `1080` |
 | `--height` | | 图片高度 | `1440` |
 
-**主题**（`-t`）：`sketch`、`default`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`
+**主题**（`-t`）：`sketch`、`default`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`、`charged-official`
 
 **分页模式**（`-m`）：
 - `separator` - 按 `---` 手动分页
