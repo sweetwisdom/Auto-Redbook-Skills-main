@@ -13,6 +13,15 @@
    米色: #F5DEB3 (小麦色)
 */
 
+:root {
+  --xhs-page-bg: linear-gradient(135deg, #d35400 0%, #f39c12 100%);
+  --xhs-cover-inner-bg: #fdf6e3;
+  --xhs-cover-title-bg: linear-gradient(180deg, #8b4513 0%, #d35400 100%);
+  --xhs-cover-subtitle-color: #5c4033;
+  --xhs-card-inner-bg: #fdf6e3;
+  --xhs-footer-color: #5c4033;
+}
+
 .card-inner {
   background-color: #fdf6e3;
 }

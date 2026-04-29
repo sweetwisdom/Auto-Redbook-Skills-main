@@ -13,6 +13,19 @@
    紫色: #A371F7 (高亮紫)
 */
 
+:root {
+  --xhs-page-bg: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  --xhs-cover-inner-bg: #0d1117;
+  --xhs-cover-title-bg: linear-gradient(180deg, #39d353 0%, #58a6ff 100%);
+  --xhs-cover-subtitle-color: #c9d1d9;
+  --xhs-cover-logo-mark-bg: #161b22;
+  --xhs-cover-logo-icon-color: #58a6ff;
+  --xhs-cover-logo-label-color: #f0f6fc;
+  --xhs-cover-logo-subtext-color: #8b949e;
+  --xhs-card-inner-bg: #0d1117;
+  --xhs-footer-color: #8b949e;
+}
+
 .card-inner {
   background-color: #0d1117;
 }

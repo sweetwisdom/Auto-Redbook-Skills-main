@@ -4,12 +4,12 @@
   "owner": {
     "name": "ZhangJia"
   },
-  "description": "小红书笔记自动创作插件：撰写内容、生成图片卡片、一键发布",
+  "description": "小红书笔记素材创作插件：撰写内容并使用 Node.js 生成图片卡片",
   "plugins": [
     {
       "name": "auto-redbook-skills",
       "source": "./",
-      "description": "小红书笔记自动创作技能。支持 8 种排版主题和 4 种智能分页模式。",
+      "description": "小红书笔记素材创作技能。使用 Node.js 渲染，支持 10 种排版主题和 4 种分页模式。",
       "category": "content",
       "keywords": [
         "xiaohongshu",

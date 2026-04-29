@@ -13,6 +13,15 @@
    黄色: #F1C40F (荧光笔)
 */
 
+:root {
+  --xhs-page-bg: linear-gradient(135deg, #555555 0%, #888888 100%);
+  --xhs-cover-inner-bg: #fffef9;
+  --xhs-cover-title-bg: linear-gradient(180deg, #111827 0%, #6b7280 100%);
+  --xhs-cover-subtitle-color: #333333;
+  --xhs-card-inner-bg: #fffef9;
+  --xhs-footer-color: #333333;
+}
+
 .card-inner {
   background-color: #fffef9;
   /* 纸张网格背景 */

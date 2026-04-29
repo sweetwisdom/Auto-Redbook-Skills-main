@@ -35,32 +35,13 @@ node scripts/render_xhs.js demos/content.md -o out
 node scripts/render_xhs.js demos/content.md -o out-html --emit-html --no-emit-png
 ```
 
----
-
-## 渲染脚本（render_xhs.py）
-
-```bash
-python scripts/render_xhs.py <markdown_file> [options]
-```
-
-### 参数列表
-
-| 参数 | 简写 | 说明 | 默认值 |
-|---|---|---|---|
-| `--output-dir` | `-o` | 输出目录 | 当前工作目录 |
-| `--theme` | `-t` | 排版主题 | `sketch` |
-| `--mode` | `-m` | 分页模式 | `separator` |
-| `--width` | `-w` | 图片宽度（px） | `1080` |
-| `--height` | | 图片高度（`dynamic` 下为最小高度） | `1440` |
-| `--max-height` | | `dynamic` 模式下的最大高度 | `4320` |
-| `--dpr` | | 设备像素比（清晰度） | `2` |
-
 ### 排版主题（`--theme`）
 
 | 值 | 名称 | 说明 |
 |---|---|---|
-| `sketch` | 手绘素描 | 手绘风格，默认 |
+| `sketch` | 手绘素描 | 手绘风格 |
 | `default` | 默认简约 | 浅灰渐变背景（`#f3f3f3 → #f9f9f9`） |
+| `ai-charging` | AI 充电官 | 深蓝渐变、闪电水印、粗体标题 |
 | `playful-geometric` | 活泼几何 | Memphis 设计风格 |
 | `neo-brutalism` | 新粗野主义 | 粗框线条、强对比 |
 | `botanical` | 植物园自然 | 自然绿植风格 |
@@ -78,85 +59,6 @@ python scripts/render_xhs.py <markdown_file> [options]
 | `auto-split` | 根据渲染后高度自动切分 | 内容长短不稳定，推荐通用选择 |
 | `dynamic` | 根据内容动态调整图片高度 | 允许不同高度卡片，字数 ≤550 |
 
-### 常用命令示例
-
-```bash
-# 默认：sketch 主题 + 手动分隔分页
-python scripts/render_xhs.py content.md
-
-# 自动分页（推荐内容不稳定时使用）
-python scripts/render_xhs.py content.md -m auto-split
-
-# 固定尺寸自动缩放
-python scripts/render_xhs.py content.md -m auto-fit
-
-# 切换主题
-python scripts/render_xhs.py content.md -t playful-geometric -m auto-split
-
-# 自定义尺寸
-python scripts/render_xhs.py content.md -t retro -m dynamic --width 1080 --height 1440 --dpr 2
-```
-
----
-
-## 发布脚本（publish_xhs.py）
-
-```bash
-python scripts/publish_xhs.py --title "标题" --desc "描述" --images img1.png img2.png
-```
-
-### 参数列表
-
-| 参数 | 简写 | 说明 | 默认值 |
-|---|---|---|---|
-| `--title` | `-t` | 笔记标题（不超过 20 字） | 必填 |
-| `--desc` | `-d` | 笔记描述/正文内容 | `""` |
-| `--images` | `-i` | 图片文件路径（可多个） | 必填 |
-| `--public` | | 公开发布（默认仅自己可见） | `False` |
-| `--post-time` | | 定时发布（格式：`2024-01-01 12:00:00`） | 立即发布 |
-| `--api-mode` | | 通过 xhs-api 服务发布 | 本地模式 |
-| `--api-url` | | API 服务地址 | `http://localhost:5005` |
-| `--dry-run` | | 仅验证，不实际发布 | `False` |
-
-> **注意**：默认以「仅自己可见」发布，确认内容无误后再用 `--public` 公开。
-
-### 常用命令示例
-
-```bash
-# 默认（仅自己可见，用于预览确认）
-python scripts/publish_xhs.py --title "标题" --desc "描述" --images cover.png card_1.png card_2.png
-
-# 公开发布
-python scripts/publish_xhs.py --title "标题" --desc "描述" --images cover.png card_1.png --public
-
-# 定时发布
-python scripts/publish_xhs.py --title "标题" --desc "描述" --images *.png --post-time "2024-12-01 10:00:00" --public
-
-# API 模式
-python scripts/publish_xhs.py --title "标题" --desc "描述" --images *.png --api-mode
-
-# 仅验证不发布
-python scripts/publish_xhs.py --title "标题" --desc "描述" --images *.png --dry-run
-```
-
-### 环境变量配置（.env）
-
-```bash
-cp env.example.txt .env
-```
-
-编辑 `.env`：
-
-```env
-# 必需：小红书 Cookie
-XHS_COOKIE=your_cookie_string_here
-
-# 可选：API 模式服务地址
-XHS_API_URL=http://localhost:5005
-```
-
-**Cookie 获取方式**：浏览器登录小红书 → F12 → Network → 任意请求的 Cookie 头，复制完整字符串。
-
 ---
 
 ## Markdown 文档格式
@@ -168,8 +70,20 @@ XHS_API_URL=http://localhost:5005
 emoji: "🚀"           # 封面装饰 Emoji
 title: "大标题"        # 封面大标题（不超过 15 字）
 subtitle: "副标题文案"  # 封面副标题（不超过 15 字）
+author: "你的名字"      # 可选，正文页脚左侧
+slogan: "@xxx 和我一起进步" # 可选，正文页脚右侧
+img_max_width: 80       # 可选，正文图片最大宽度百分比
+logo:                  # 可选，仅封面显示
+  icon: "mdi:lightning-bolt"
+  img: "./cover-avatar.png"
+  label: "品牌名"
+  subtext: "一句话介绍"
+  size: 220
 ---
 ```
+
+- `logo.img` 和 Markdown 图片相对 Markdown 文件所在目录解析。
+- 同时配置 `logo.img` 与 `logo.icon` 时，优先使用本地图片。
 
 ### 分页分隔符
 

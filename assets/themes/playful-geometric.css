@@ -13,6 +13,15 @@
    薄荷绿: #34D399 (Emerald/Mint - 清新感)
 */
 
+:root {
+  --xhs-page-bg: linear-gradient(135deg, #8b5cf6 0%, #f472b6 100%);
+  --xhs-cover-inner-bg: #fffdf5;
+  --xhs-cover-title-bg: linear-gradient(180deg, #7c3aed 0%, #f472b6 100%);
+  --xhs-cover-subtitle-color: #1e293b;
+  --xhs-card-inner-bg: #fffdf5;
+  --xhs-footer-color: #1e293b;
+}
+
 .card-inner {
   background-color: #fffdf5;
   /* 几何点阵背景装饰 */

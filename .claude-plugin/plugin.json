@@ -1,6 +1,6 @@
 {
   "name": "auto-redbook-skills",
-  "description": "小红书笔记自动创作技能：撰写内容、生成精美封面与正文卡片、可选一键发布。支持 8 种排版主题（sketch / neo-brutalism / botanical 等）和 4 种智能分页模式。",
+  "description": "小红书笔记素材创作技能：撰写内容并使用 Node.js 生成精美封面与正文卡片。支持 10 种排版主题（ai-charging / sketch / neo-brutalism / botanical / charged-official 等）和 4 种分页模式。",
   "version": "1.0.0",
   "category": "content",
   "keywords": [

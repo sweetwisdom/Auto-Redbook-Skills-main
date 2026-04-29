@@ -3,6 +3,26 @@
    暖黄渐变卡片、粗黑标题、中部品牌区
    ============================================ */
 
+:root {
+  --xhs-page-bg: linear-gradient(180deg, #fb923c 0%, #fef3c7 45%, #fffbeb 100%);
+  --xhs-cover-inner-bg: linear-gradient(180deg, #fff7ed 0%, #fde68a 52%, #fffbeb 100%);
+  --xhs-cover-title-bg: linear-gradient(180deg, #431407 0%, #ea580c 55%, #fbbf24 100%);
+  --xhs-cover-subtitle-color: #431407;
+  --xhs-card-inner-bg: linear-gradient(180deg, #fef9e8 0%, #ffffff 55%, #fffef9 100%);
+  --xhs-footer-color: #431407;
+}
+
+.cover-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 18% 28%, rgba(251, 191, 36, 0.22) 0%, transparent 42%),
+    radial-gradient(circle at 82% 18%, rgba(245, 158, 11, 0.18) 0%, transparent 38%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.08) 0px, rgba(255, 255, 255, 0.08) 2px, transparent 2px, transparent 80px);
+  pointer-events: none;
+}
+
 .card-inner {
   background: linear-gradient(180deg, #fef9e8 0%, #ffffff 55%, #fffef9 100%) !important;
   border-radius: 28px !important;

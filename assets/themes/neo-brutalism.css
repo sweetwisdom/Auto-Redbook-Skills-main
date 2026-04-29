@@ -14,6 +14,15 @@
    强调紫: #A29BFE (柔和紫)
 */
 
+:root {
+  --xhs-page-bg: linear-gradient(135deg, #ff4757 0%, #feca57 100%);
+  --xhs-cover-inner-bg: #fffdf5;
+  --xhs-cover-title-bg: linear-gradient(180deg, #000000 0%, #ff4757 100%);
+  --xhs-cover-subtitle-color: #000000;
+  --xhs-card-inner-bg: #fffdf5;
+  --xhs-footer-color: #000000;
+}
+
 .card-inner {
   background-color: #fffdf5;
   /* 纸张纹理感 */

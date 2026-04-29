@@ -4,7 +4,7 @@
 
 ## ✨ 项目亮点
 
-- **🎨 9 套主题皮肤**：默认简约灰 + Playful Geometric / Neo-Brutalism / Botanical / Professional / Retro / Terminal / Sketch / Charged Official（暖黄「充电」参考风）
+- **🎨 10 套主题皮肤**：默认简约灰 + AI Charging / Playful Geometric / Neo-Brutalism / Botanical / Professional / Retro / Terminal / Sketch / Charged Official（暖黄「充电」参考风）
 - **📐 4 种分页模式**：
   - `separator`：按 `---` 分隔手动分页
   - `auto-fit`：固定尺寸，自动整体缩放内容，避免溢出/大面积留白
@@ -68,7 +68,7 @@ npm i
 
 | 参数 | 简写 | 说明 |
 |------|------|------|
-| `--theme` | `-t` | 主题：`default`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`、`sketch`、`charged-official` |
+| `--theme` | `-t` | 主题：`default`、`ai-charging`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`、`sketch`、`charged-official` |
 | `--mode` | `-m` | 分页模式：`separator` / `auto-fit` / `auto-split` / `dynamic` |
 | `--width` | `-w` | 图片宽度（默认 1080） |
 | `--height` |  | 图片高度（默认 1440，`dynamic` 为最小高度） |
@@ -98,6 +98,9 @@ node scripts/render_xhs.js demos/content.md -t neo-brutalism  -o out-neo-brutali
 
 # 暖黄「充电」参考主题 + 中部 Logo（见 demos/charged-official.md）
 node scripts/render_xhs.js demos/charged-official.md -t charged-official -o out-charged
+
+# 蓝色 AI 充电官主题
+node scripts/render_xhs.js demos/obsidian-sync-double-insurance.md -t ai-charging -m separator -o out/obsidian-sync-ai-charging
 
 # 只要 HTML（不截图）
 node scripts/render_xhs.js demos/content.md -o out-html --emit-html --no-emit-png
@@ -141,6 +144,11 @@ logo:
 - Markdown 与 `logo.img` 中的相对路径先相对 **Markdown 文件所在目录** 解析为真实文件，再在输出 HTML 中转成相对 **`--output-dir`** 的路径（便于与 `file://` 打开的中间 HTML 一致）
 - 例如 Markdown 在 `demos/a.md`，图片为 `demos/.imgs/x.png` 时写成 `![示例](./.imgs/x.png)` 
 
+### 主题 `ai-charging`
+
+- 接近「深蓝渐变 + 闪电水印 + 粗体标题」的 AI 充电官视觉，适合 AI 工具、效率方法、CLI/Agent 教程。
+- 示例命令：`node scripts/render_xhs.js demos/obsidian-sync-double-insurance.md -t ai-charging -m separator -o out/obsidian-sync-ai-charging`
+
 ### 主题 `charged-official`
 
 - 接近「暖黄渐变 + 粗黑标题」的参考视觉；封面为同系近似渐变（高保真主要针对正文卡片）
@@ -175,8 +183,9 @@ Auto-Redbook-Skills/
 │   ├── card.html         # 正文卡片 HTML 模板
 │   ├── styles.css        # 共用容器样式（cover-inner / card-inner 等）
 │   └── example.md        # 示例 Markdown
-├── assets/themes/        # 主题样式（只控制排版 & 内层背景）
+├── assets/themes/        # 主题样式（封面/背景/正文排版）
 │   ├── default.css
+│   ├── ai-charging.css
 │   ├── playful-geometric.css
 │   ├── neo-brutalism.css
 │   ├── botanical.css

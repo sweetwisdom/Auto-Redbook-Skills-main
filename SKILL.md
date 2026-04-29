@@ -1,11 +1,11 @@
 ---
 name: xhs-note-creator
-description: 小红书笔记素材创作技能。当用户需要创建小红书笔记素材时使用这个技能。技能包含：根据用户的需求和提供的资料，撰写小红书笔记内容（标题+正文），生成图片卡片（封面+正文卡片），以及发布小红书笔记。支持 9 种精美排版主题和 4 种智能分页模式。
+description: 小红书笔记素材创作技能。当用户需要创建小红书图文笔记素材时使用这个技能。技能包含：根据用户需求和资料撰写小红书笔记内容，生成渲染用 Markdown，并使用 Node.js + Playwright/marked/yaml 渲染封面和正文图片卡片。支持 10 种主题、4 种分页模式、HTML/PNG 输出开关、封面 Logo、页脚作者/口号和 Markdown 图片路径处理。
 ---
 
 # 小红书笔记创作技能
 
-根据用户提供的资料或需求，创作小红书笔记内容、生成精美图片卡片，并可选择发布到小红书。
+根据用户提供的资料或需求，创作小红书笔记内容，并用 Node.js 渲染生成精美图片卡片。
 
 > 详细参数文档见 `references/params.md`
 
@@ -46,12 +46,32 @@ subtitle: "封面副标题（≤15字）"
 分页策略选择：
 - 内容需精确切分 → 用 `---` 手动分隔，配合 `-m separator`
 - 内容长短不稳定 → 生成普通 Markdown，使用 `-m auto-split`
+- 单张内容希望固定尺寸不溢出 → 使用 `-m auto-fit`
+- 允许卡片按内容增高 → 使用 `-m dynamic`
+
+可选 frontmatter：
+
+```yaml
+author: "你的名字"
+slogan: "@xxx 和我一起进步"
+img_max_width: 80
+logo:
+  icon: "mdi:lightning-bolt"
+  img: "./cover-avatar.png"
+  label: "品牌名"
+  subtext: "副标题或一句话介绍"
+  size: 220
+```
+
+- `author` / `slogan` 显示在正文页脚，页脚中间自动显示页码。
+- `img_max_width` 控制正文图片最大宽度百分比，默认 `80`。
+- `logo` 仅显示在封面；`logo.img` 相对 Markdown 文件目录解析，且优先于 `logo.icon`。
 
 ---
 
 ### 第三步：渲染图片卡片
 
-推荐使用 Node.js 版本（支持 `charged-official` 等主题、HTML/PNG 输出开关、PNG 并行渲染）：
+主推 Node.js 版本（当前仓库的主要渲染入口，支持 10 种主题、HTML/PNG 输出开关、PNG 并行渲染）：
 
 ```bash
 node scripts/render_xhs.js <markdown_file> [options]
@@ -65,38 +85,20 @@ node scripts/render_xhs.js content.md
 
 # 只输出 HTML（不截图）
 node scripts/render_xhs.js content.md --emit-html --no-emit-png
+
+# 指定输出目录和主题
+node scripts/render_xhs.js content.md -o out -t terminal -m auto-split
 ```
 
----
-
-兼容：也可以使用 Python 版本：
-
-```bash
-python scripts/render_xhs.py <markdown_file> [options]
-```
-
-**默认主题**：`sketch`（手绘素描风格）  
-**默认分页**：`separator`（按 `---` 分隔）
-
-常用示例：
-
-```bash
-# 默认（sketch 主题 + 手动分页）
-python scripts/render_xhs.py content.md
-
-# 自动分页（推荐内容长短不定时）
-python scripts/render_xhs.py content.md -m auto-split
-
-# 切换主题
-python scripts/render_xhs.py content.md -t playful-geometric -m auto-split
-
-# 固定尺寸自动缩放
-python scripts/render_xhs.py content.md -m auto-fit
-```
+默认值：
+- 主题：`default`
+- 分页：`separator`
+- 尺寸：`1080x1440`
+- 输出：PNG 开启，HTML 关闭
 
 生成结果：`cover.png`（封面）+ `card_1.png`、`card_2.png`...（正文卡片）
 
-**可用主题**（`-t`）：`sketch`、`default`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`、`charged-official`
+**可用主题**（`-t`）：`sketch`、`default`、`ai-charging`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`、`charged-official`
 
 **分页模式**（`-m`）：`separator`、`auto-fit`、`auto-split`、`dynamic`
 
@@ -104,30 +106,10 @@ python scripts/render_xhs.py content.md -m auto-fit
 
 ---
 
-### 第四步：发布小红书笔记（可选）
-
-**前置条件**：配置好 `.env` 文件中的 `XHS_COOKIE`（详见 `references/params.md`）
-
-```bash
-# 默认仅自己可见（推荐先预览确认）
-python scripts/publish_xhs.py --title "笔记标题" --desc "笔记描述" \
-  --images cover.png card_1.png card_2.png
-
-# 确认无误后公开发布
-python scripts/publish_xhs.py --title "笔记标题" --desc "笔记描述" \
-  --images cover.png card_1.png card_2.png --public
-```
-
-> **默认以「仅自己可见」发布**，加 `--public` 参数才会公开。
-
----
-
 ## 技能资源
 
 ### 脚本
-- `scripts/render_xhs.py` — 渲染脚本（主推，8 主题 + 4 分页模式）
-- `scripts/render_xhs_v2.py` — 渲染脚本 V2（备用，7 种渐变色彩风格）
-- `scripts/publish_xhs.py` — 发布脚本
+- `scripts/render_xhs.js` — 主渲染脚本（Node.js，10 主题 + 4 分页模式）
 
 ### 模板与样式
 - `assets/cover.html` — 封面 HTML 模板
@@ -136,4 +118,4 @@ python scripts/publish_xhs.py --title "笔记标题" --desc "笔记描述" \
 - `assets/themes/` — 各主题 CSS 文件
 
 ### 参考文档
-- `references/params.md` — 完整参数参考（主题/模式/发布参数）
+- `references/params.md` — 完整参数参考（主题/模式/Markdown 元数据参数）

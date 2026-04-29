@@ -37,9 +37,9 @@ const DEFAULT_WIDTH = 1080;
 const DEFAULT_HEIGHT = 1440;
 const MAX_HEIGHT = 2160;
 
-// 可用主题列表
-const AVAILABLE_THEMES = [
+const THEME_ORDER = [
     "default",
+    "ai-charging",
     "playful-geometric",
     "neo-brutalism",
     "botanical",
@@ -53,33 +53,34 @@ const AVAILABLE_THEMES = [
 // 分页模式
 const PAGING_MODES = ["separator", "auto-fit", "auto-split", "dynamic"];
 
-// 主题背景色
-const THEME_BACKGROUNDS = {
-    default: "linear-gradient(180deg, #f3f3f3 0%, #f9f9f9 100%)",
-    "playful-geometric": "linear-gradient(135deg, #8B5CF6 0%, #F472B6 100%)",
-    "neo-brutalism": "linear-gradient(135deg, #FF4757 0%, #FECA57 100%)",
-    botanical: "linear-gradient(135deg, #4A7C59 0%, #8FBC8F 100%)",
-    professional: "linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)",
-    retro: "linear-gradient(135deg, #D35400 0%, #F39C12 100%)",
-    terminal: "linear-gradient(135deg, #0D1117 0%, #161B22 100%)",
-    sketch: "linear-gradient(135deg, #555555 0%, #888888 100%)",
-    "charged-official":
-        "linear-gradient(180deg, #fb923c 0%, #fef3c7 45%, #fffbeb 100%)",
-};
+const DEFAULT_PAGE_BG = "linear-gradient(180deg, #f3f3f3 0%, #f9f9f9 100%)";
+const DEFAULT_COVER_TITLE_BG =
+    "linear-gradient(180deg, #111827 0%, #4B5563 100%)";
+const DEFAULT_COVER_INNER_BG = "#F3F3F3";
+const DEFAULT_CARD_INNER_BG = "rgba(255, 255, 255, 0.95)";
 
-// 封面标题文字渐变（随主题变化）
-const THEME_TITLE_GRADIENTS = {
-    default: "linear-gradient(180deg, #111827 0%, #4B5563 100%)",
-    "playful-geometric": "linear-gradient(180deg, #7C3AED 0%, #F472B6 100%)",
-    "neo-brutalism": "linear-gradient(180deg, #000000 0%, #FF4757 100%)",
-    botanical: "linear-gradient(180deg, #1F2937 0%, #4A7C59 100%)",
-    professional: "linear-gradient(180deg, #1E3A8A 0%, #2563EB 100%)",
-    retro: "linear-gradient(180deg, #8B4513 0%, #D35400 100%)",
-    terminal: "linear-gradient(180deg, #39D353 0%, #58A6FF 100%)",
-    sketch: "linear-gradient(180deg, #111827 0%, #6B7280 100%)",
-    "charged-official":
-        "linear-gradient(180deg, #431407 0%, #ea580c 55%, #fbbf24 100%)",
-};
+const AVAILABLE_THEMES = getAvailableThemes();
+
+/**
+ * 从 assets/themes 自动发现可用主题，按常用顺序展示。
+ */
+function getAvailableThemes() {
+    if (!fs.existsSync(THEMES_DIR)) {
+        return ["default"];
+    }
+
+    const discovered = fs
+        .readdirSync(THEMES_DIR)
+        .filter((file) => file.endsWith(".css"))
+        .map((file) => path.basename(file, ".css"));
+
+    const known = THEME_ORDER.filter((theme) => discovered.includes(theme));
+    const extra = discovered
+        .filter((theme) => !THEME_ORDER.includes(theme))
+        .sort((a, b) => a.localeCompare(b));
+
+    return [...known, ...extra];
+}
 
 /**
  * 解析命令行参数
@@ -441,8 +442,10 @@ function getCoverLogoBlockCss(width) {
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
+            background: var(--xhs-cover-logo-mark-bg, transparent);
             border-radius: 42px;
             box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+            color: var(--xhs-cover-logo-icon-color, currentColor);
         }
         .cover-inner .card-logo-block .logo-mark iconify-icon {
             display: block !important;
@@ -462,14 +465,14 @@ function getCoverLogoBlockCss(width) {
         .cover-inner .card-logo-block .logo-label {
             font-size: ${Math.floor(width * 0.085)}px;
             font-weight: 900;
-            color: #030712;
+            color: var(--xhs-cover-logo-label-color, #030712);
             margin: ${Math.floor(width * 0.02)}px 0 0 0;
             line-height: 1.15;
         }
         .cover-inner .card-logo-block .logo-subtext {
             font-size: ${Math.floor(width * 0.038)}px;
             font-weight: 550;
-            color: #374151;
+            color: var(--xhs-cover-logo-subtext-color, #374151);
             margin: ${Math.floor(width * 0.022)}px auto 0 auto;
             max-width: 92%;
             line-height: 1.5;
@@ -495,28 +498,7 @@ function generateCoverHtml(
     if (subtitle.length > 15) subtitle = subtitle.slice(0, 15);
 
     const hasCoverLogo = String(logoBlockHtml || "").trim().length > 0;
-
-    const bg = THEME_BACKGROUNDS[theme] || THEME_BACKGROUNDS["default"];
-    const titleBg =
-        THEME_TITLE_GRADIENTS[theme] || THEME_TITLE_GRADIENTS["default"];
-    const chargedOfficialCover = theme === "charged-official";
-    const coverInnerBg = chargedOfficialCover
-        ? "linear-gradient(180deg, #fff7ed 0%, #fde68a 52%, #fffbeb 100%)"
-        : "#F3F3F3";
-    const chargedOverlay = chargedOfficialCover
-        ? `
-        .cover-container::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image:
-                radial-gradient(circle at 18% 28%, rgba(251, 191, 36, 0.22) 0%, transparent 42%),
-                radial-gradient(circle at 82% 18%, rgba(245, 158, 11, 0.18) 0%, transparent 38%),
-                repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.08) 0px, rgba(255, 255, 255, 0.08) 2px, transparent 2px, transparent 80px);
-            pointer-events: none;
-        }
-        `
-        : "";
+    const themeCss = loadThemeCss(theme);
 
     return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -539,11 +521,10 @@ function generateCoverHtml(
         .cover-container {
             width: ${width}px;
             height: ${height}px;
-            background: ${bg};
+            background: var(--xhs-page-bg, ${DEFAULT_PAGE_BG});
             position: relative;
             overflow: hidden;
         }
-        ${chargedOverlay}
         
         .cover-inner {
             position: absolute;
@@ -551,7 +532,7 @@ function generateCoverHtml(
             height: ${Math.floor(height * 0.91)}px;
             left: ${Math.floor(width * 0.06)}px;
             top: ${Math.floor(height * 0.045)}px;
-            background: ${coverInnerBg};
+            background: var(--xhs-cover-inner-bg, ${DEFAULT_COVER_INNER_BG});
             border-radius: 25px;
             display: flex;
             flex-direction: column;
@@ -568,9 +549,10 @@ function generateCoverHtml(
             font-weight: 900;
             font-size: ${Math.floor(width * 0.12)}px;
             line-height: 1.4;
-            background: ${titleBg};
+            color: var(--xhs-cover-title-color, transparent);
+            background: var(--xhs-cover-title-bg, ${DEFAULT_COVER_TITLE_BG});
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-text-fill-color: var(--xhs-cover-title-fill, transparent);
             background-clip: text;
             ${hasCoverLogo ? "flex-shrink: 0;" : "flex: 1;"}
             display: flex;
@@ -587,10 +569,11 @@ function generateCoverHtml(
             font-weight: 350;
             font-size: ${Math.floor(width * 0.067)}px;
             line-height: 1.4;
-            color: #000000;
+            color: var(--xhs-cover-subtitle-color, #000000);
             margin-top: ${hasCoverLogo ? "0" : "auto"};
         }
         ${hasCoverLogo ? getCoverLogoBlockCss(width) : ""}
+        ${themeCss}
     </style>
     ${
         hasCoverLogo
@@ -639,7 +622,6 @@ function generateCardHtml(
     );
     const themeCss = loadThemeCss(theme);
     const pageText = `${pageNumber}/${totalPages}`;
-    const bg = THEME_BACKGROUNDS[theme] || THEME_BACKGROUNDS["default"];
     const authorText = escapeHtml(footerConfig.author || "");
     const sloganText = escapeHtml(footerConfig.slogan || "");
 
@@ -649,13 +631,13 @@ function generateCardHtml(
         containerStyle = `
             width: ${width}px;
             height: ${height}px;
-            background: ${bg};
+            background: var(--xhs-page-bg, ${DEFAULT_PAGE_BG});
             position: relative;
             padding: 50px;
             overflow: hidden;
         `;
         innerStyle = `
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--xhs-card-inner-bg, ${DEFAULT_CARD_INNER_BG});
             border-radius: 20px;
             padding: 60px;
             height: calc(${height}px - 100px);
@@ -670,12 +652,12 @@ function generateCardHtml(
         containerStyle = `
             width: ${width}px;
             min-height: ${height}px;
-            background: ${bg};
+            background: var(--xhs-page-bg, ${DEFAULT_PAGE_BG});
             position: relative;
             padding: 50px;
         `;
         innerStyle = `
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--xhs-card-inner-bg, ${DEFAULT_CARD_INNER_BG});
             border-radius: 20px;
             padding: 60px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -688,13 +670,13 @@ function generateCardHtml(
         containerStyle = `
             width: ${width}px;
             min-height: ${height}px;
-            background: ${bg};
+            background: var(--xhs-page-bg, ${DEFAULT_PAGE_BG});
             position: relative;
             padding: 50px;
             overflow: hidden;
         `;
         innerStyle = `
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--xhs-card-inner-bg, ${DEFAULT_CARD_INNER_BG});
             border-radius: 20px;
             padding: 60px;
             min-height: calc(${height}px - 100px);
@@ -747,8 +729,9 @@ function generateCardHtml(
             justify-content: space-between;
             gap: 16px;
             font-size: 24px;
-           font-weight: 300;
-            opacity: 0.6;
+            font-weight: 300;
+            color: var(--xhs-footer-color, currentColor);
+            opacity: var(--xhs-footer-opacity, 0.6);
         }
 
         .card-footer > span {
@@ -766,7 +749,7 @@ function generateCardHtml(
         .footer-center {
             flex: 0 0 auto;
             font-size: 30px;
-             font-weight: 600;
+            font-weight: 600;
             opacity: 0.5;
         }
 
