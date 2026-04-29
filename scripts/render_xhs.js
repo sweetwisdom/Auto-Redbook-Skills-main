@@ -406,6 +406,13 @@ function splitContentBySeparator(body) {
     return parts.map((p) => p.trim()).filter((p) => p);
 }
 
+function splitContentByParagraph(body) {
+    return body
+        .split(/\n{2,}/)
+        .map((part) => part.trim())
+        .filter(Boolean);
+}
+
 /**
  * 加载主题 CSS
  */
@@ -866,16 +873,10 @@ async function renderHtmlToImage(
         await page.waitForTimeout(100);
         actualHeight = height;
     } else if (mode === "dynamic") {
-        const contentHeight = await page.evaluate(() => {
-            const container = document.querySelector(".card-container");
-            return container ? container.scrollHeight : document.body.scrollHeight;
-        });
+        const contentHeight = await page.evaluate(getRenderedContentHeight);
         actualHeight = Math.max(height, Math.min(contentHeight, maxHeight));
     } else {
-        const contentHeight = await page.evaluate(() => {
-            const container = document.querySelector(".card-container");
-            return container ? container.scrollHeight : document.body.scrollHeight;
-        });
+        const contentHeight = await page.evaluate(getRenderedContentHeight);
         actualHeight = Math.max(height, contentHeight);
     }
 
@@ -888,6 +889,116 @@ async function renderHtmlToImage(
     await page.close();
     console.log(`  ✅ 已生成: ${outputPath} (${width}x${actualHeight})`);
     return actualHeight;
+}
+
+function getRenderedContentHeight() {
+    const container = document.querySelector(".card-container");
+    if (!container) return document.body.scrollHeight;
+
+    const containerRect = container.getBoundingClientRect();
+    const inner = document.querySelector(".card-inner");
+    const content = document.querySelector(".card-content-scale");
+    const footer = document.querySelector(".card-footer");
+    const bottoms = [container.scrollHeight, document.body.scrollHeight];
+
+    for (const el of [inner, content, footer]) {
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        const bottom = rect.bottom - containerRect.top;
+        bottoms.push(Math.ceil(bottom));
+    }
+
+    if (inner) {
+        const innerTop = inner.getBoundingClientRect().top - containerRect.top;
+        bottoms.push(Math.ceil(innerTop + inner.scrollHeight));
+    }
+
+    return Math.max(...bottoms);
+}
+
+async function autoSplitContent(
+    body,
+    theme,
+    width,
+    height,
+    dpr,
+    markdownDir,
+    outputDir,
+    footerConfig,
+    imageMaxWidth,
+) {
+    const paragraphs = splitContentByParagraph(body);
+    if (paragraphs.length === 0) return [];
+
+    const browser = await chromium.launch({ channel: "chrome" });
+    const page = await browser.newPage({
+        viewport: { width, height: height * 2 },
+        deviceScaleFactor: dpr,
+    });
+
+    const baseHref = pathToFileURL(path.resolve(outputDir)).href.replace(
+        /\/?$/,
+        "/",
+    );
+
+    async function measureContentHeight(content) {
+        const html = generateCardHtml(
+            content,
+            theme,
+            1,
+            1,
+            width,
+            height,
+            "auto-split",
+            markdownDir,
+            outputDir,
+            footerConfig,
+            imageMaxWidth,
+            "",
+        ).replace(
+            /<head(\s[^>]*)?>/i,
+            (m) => `${m}\n    <base href="${baseHref}">`,
+        );
+
+        await page.setContent(html);
+        await page.waitForLoadState("networkidle");
+        await page.waitForTimeout(100);
+
+        return page.evaluate(() => {
+            const content = document.querySelector(".card-content-scale");
+            if (!content) return 0;
+            const rect = content.getBoundingClientRect();
+            return Math.ceil(Math.max(content.scrollHeight, rect.height));
+        });
+    }
+
+    const cards = [];
+    let currentContent = [];
+    const availableHeight = Math.max(1, height - 50 * 2 - 60 * 2 - 100);
+
+    try {
+        for (const paragraph of paragraphs) {
+            const testContent = [...currentContent, paragraph];
+            const testMarkdown = testContent.join("\n\n");
+            const contentHeight = await measureContentHeight(testMarkdown);
+
+            if (contentHeight > availableHeight && currentContent.length > 0) {
+                cards.push(currentContent.join("\n\n"));
+                currentContent = [paragraph];
+            } else {
+                currentContent = testContent;
+            }
+        }
+
+        if (currentContent.length > 0) {
+            cards.push(currentContent.join("\n\n"));
+        }
+    } finally {
+        await page.close();
+        await browser.close();
+    }
+
+    return cards;
 }
 
 /**
@@ -957,7 +1068,23 @@ async function renderMarkdownToCards(options) {
     );
 
     // 分割内容
-    const cardContents = splitContentBySeparator(body);
+    const cardContents =
+        mode === "auto-split"
+            ? await (async () => {
+                  console.log("  ⏳ 自动分析内容并切分...");
+                  return autoSplitContent(
+                      body,
+                      theme,
+                      width,
+                      height,
+                      dpr,
+                      markdownDir,
+                      outputDir,
+                      footerConfig,
+                      imageMaxWidth,
+                  );
+              })()
+            : splitContentBySeparator(body);
     const totalCards = cardContents.length;
 
     console.log(`  📄 检测到 ${totalCards} 张正文卡片`);

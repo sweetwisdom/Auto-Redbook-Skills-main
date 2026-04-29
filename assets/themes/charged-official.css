@@ -112,6 +112,13 @@
   white-space: pre-wrap;
 }
 
+.card-content pre code {
+  color: inherit !important;
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+}
+
 /* 中部品牌区 */
 .card-logo-block {
   flex-shrink: 0;
