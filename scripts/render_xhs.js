@@ -95,6 +95,8 @@ function parseArgs() {
         height: DEFAULT_HEIGHT,
         maxHeight: MAX_HEIGHT,
         dpr: 2,
+        emitHtml: false,
+        emitPng: true,
     };
 
     for (let i = 0; i < args.length; i++) {
@@ -102,6 +104,18 @@ function parseArgs() {
         const nextArg = args[i + 1];
 
         switch (arg) {
+            case "--emit-html":
+                options.emitHtml = true;
+                break;
+            case "--no-emit-html":
+                options.emitHtml = false;
+                break;
+            case "--emit-png":
+                options.emitPng = true;
+                break;
+            case "--no-emit-png":
+                options.emitPng = false;
+                break;
             case "--output-dir":
             case "-o":
                 options.outputDir = nextArg;
@@ -158,6 +172,10 @@ function printHelp() {
     node render_xhs.js <markdown_file> [options]
 
 选项:
+    --emit-html           输出 HTML（默认关闭）
+    --no-emit-html        不输出 HTML
+    --emit-png            输出 PNG（默认开启）
+    --no-emit-png         不输出 PNG
     --output-dir, -o     输出目录（默认为当前工作目录）
     --theme, -t          排版主题
     --mode, -m           分页模式
@@ -423,7 +441,6 @@ function getCoverLogoBlockCss(width) {
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
-            background: linear-gradient(145deg, #0f172a 0%, #020617 100%);
             border-radius: 42px;
             box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
         }
@@ -898,6 +915,8 @@ async function renderMarkdownToCards(options) {
         height,
         maxHeight,
         dpr,
+        emitHtml,
+        emitPng,
     } = options;
 
     console.log(`\n🎨 开始渲染: ${markdownFile}`);
@@ -941,17 +960,25 @@ async function renderMarkdownToCards(options) {
             height,
             logoBlockHtml,
         );
-        fs.writeFileSync(path.join(outputDir, "cover.html"), coverHtml, "utf-8");
-        const coverPath = path.join(outputDir, "cover.png");
-        await renderHtmlToImage(
-            coverHtml,
-            coverPath,
-            width,
-            height,
-            "separator",
-            maxHeight,
-            dpr,
-        );
+        if (emitHtml) {
+            fs.writeFileSync(
+                path.join(outputDir, "cover.html"),
+                coverHtml,
+                "utf-8",
+            );
+        }
+        if (emitPng) {
+            const coverPath = path.join(outputDir, "cover.png");
+            await renderHtmlToImage(
+                coverHtml,
+                coverPath,
+                width,
+                height,
+                "separator",
+                maxHeight,
+                dpr,
+            );
+        }
     }
 
     // 生成正文卡片
@@ -972,24 +999,34 @@ async function renderMarkdownToCards(options) {
             imageMaxWidth,
             "",
         );
-        fs.writeFileSync(
-            path.join(outputDir, `card_${i + 1}.html`),
-            cardHtml,
-            "utf-8",
-        );
-        const cardPath = path.join(outputDir, `card_${i + 1}.png`);
-        await renderHtmlToImage(
-            cardHtml,
-            cardPath,
-            width,
-            height,
-            mode,
-            maxHeight,
-            dpr,
-        );
+        if (emitHtml) {
+            fs.writeFileSync(
+                path.join(outputDir, `card_${i + 1}.html`),
+                cardHtml,
+                "utf-8",
+            );
+        }
+        if (emitPng) {
+            const cardPath = path.join(outputDir, `card_${i + 1}.png`);
+            await renderHtmlToImage(
+                cardHtml,
+                cardPath,
+                width,
+                height,
+                mode,
+                maxHeight,
+                dpr,
+            );
+        }
     }
 
-    console.log(`\n✨ 渲染完成！图片已保存到: ${outputDir}`);
+    const emitted = [
+        emitPng ? "PNG" : null,
+        emitHtml ? "HTML" : null,
+    ]
+        .filter(Boolean)
+        .join(" + ");
+    console.log(`\n✨ 渲染完成！已输出: ${emitted || "（无）"} -> ${outputDir}`);
 }
 
 /**

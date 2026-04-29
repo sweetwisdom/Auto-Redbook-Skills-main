@@ -74,10 +74,12 @@ npm i
 | `--height` |  | 图片高度（默认 1440，`dynamic` 为最小高度） |
 | `--max-height` |  | `dynamic` 模式最大高度（默认 2160） |
 | `--dpr` |  | 设备像素比，控制清晰度（默认 2） |
+| `--emit-html` / `--no-emit-html` |  | 是否输出中间 HTML（默认关闭） |
+| `--emit-png` / `--no-emit-png` |  | 是否输出 PNG 图片（默认开启） |
 
-> 生成结果会包含：
-> - 图片：`cover.png`、`card_1.png`、`card_2.png`...
-> - 中间 HTML：`cover.html`、`card_1.html`、`card_2.html`...
+> 生成结果（可通过参数开关控制）：
+> - PNG：`cover.png`、`card_1.png`、`card_2.png`...
+> - HTML：`cover.html`、`card_1.html`、`card_2.html`...
 
 ---
 
@@ -118,7 +120,7 @@ logo:
 - `slogan`：正文页脚右侧文案
 - `img_max_width`：正文图片最大宽度百分比（默认 `80`，可写 `70` 或 `70%`）
 - `logo`：可选。中部品牌区 **仅出现在封面**（正文卡片不重复显示）
-  - `logo.icon`：Iconify 图标名（默认 `mdi:flash`）
+  - `logo.icon`：Iconify 图标名（可以使用在线品牌logo `devicon:google`）
   - `logo.img`：本地图片路径（**相对 Markdown 文件目录**；任意常见图片格式）
   - **优先级**：同时配置时 **`logo.img` 优先于 `logo.icon`**
   - `logo.label` / `logo.subtext`：主标题与说明文案（可选）

@@ -29,6 +29,8 @@ npm run install-browsers
 | `--mode` | `-m` | 分页模式 | `separator` |
 | `--width` | `-w` | 图片宽度 | `1080` |
 | `--height` | | 图片高度 | `1440` |
+| `--emit-html / --no-emit-html` | | 是否输出 HTML | 关闭 |
+| `--emit-png / --no-emit-png` | | 是否输出 PNG | 开启 |
 
 **主题**（`-t`）：`sketch`、`default`、`playful-geometric`、`neo-brutalism`、`botanical`、`professional`、`retro`、`terminal`、`charged-official`
 
