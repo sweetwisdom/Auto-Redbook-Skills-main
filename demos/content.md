@@ -2,19 +2,27 @@
 emoji: "🚀"
 title: "5个效率神器"
 subtitle: "让工作效率翻倍"
+author: "你的名字"
+slogan: "@xxx 和我一起进步"
+img_max_width: 80
 ---
 
 # 神器一：Notion 📝
 
 全能型笔记工具，支持数据库、看板、日历等多种视图。
 
+
+
 > 一个工具替代十个 App，笔记、任务、项目管理全搞定！
 
-**核心功能：**
+**核心功能 <iconify-icon icon="mdi:rocket-launch"></iconify-icon> ：**
+
 - 📊 灵活的数据库视图
 - 🔗 双向链接
 - 🎨 丰富的模板库
 - 👥 团队协作
+
+
 
 ---
 
@@ -32,6 +40,8 @@ raycast://extensions/raycast/clipboard/clipboard-history
 - 窗口管理
 - 快捷短语
 - API 调试工具
+
+
 
 ---
 
@@ -68,10 +78,4 @@ def example():
 - 数百种 CLI 工具支持
 - 可视化参数提示
 - 团队协作分享
-
-```sh
-pwd
-ls
-cd ~/
-
-```
+![wz](./.imgs/wz.jpg)

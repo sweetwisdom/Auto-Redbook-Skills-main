@@ -75,7 +75,9 @@ npm i
 | `--max-height` |  | `dynamic` 模式最大高度（默认 2160） |
 | `--dpr` |  | 设备像素比，控制清晰度（默认 2） |
 
-> 生成结果会包含：封面 `cover.png` + 正文卡片 `card_1.png`、`card_2.png`...
+> 生成结果会包含：
+> - 图片：`cover.png`、`card_1.png`、`card_2.png`...
+> - 中间 HTML：`cover.html`、`card_1.html`、`card_2.html`...
 
 ---
 
@@ -88,6 +90,39 @@ node scripts/render_xhs.js demos/content.md -t terminal -m auto-split
 
 # 指定主题 + 输出
 node scripts/render_xhs.js demos/content.md -t neo-brutalism  -o out-neo-brutalism 
+```
+
+### Markdown Frontmatter（页脚配置）
+
+```yaml
+---
+emoji: "🚀"
+title: "封面大标题"
+subtitle: "封面副标题"
+author: "你的名字"
+slogan: "@xxx 和我一起进步"
+img_max_width: 80
+---
+```
+
+- `author`：正文页脚左侧文案
+- `slogan`：正文页脚右侧文案
+- `img_max_width`：正文图片最大宽度百分比（默认 `80`，可写 `70` 或 `70%`）
+- 页脚中间自动显示页码（例如 `1/4`），封面不显示页脚
+
+### Markdown 图片路径规则
+
+- Markdown 中图片支持正常渲染
+- 相对路径按 `--output-dir` 作为基准目录解析
+- 例如：`![示例](images/demo.png)` 会解析为 `<output-dir>/images/demo.png`
+
+### Iconify 图标支持
+
+- 正文卡片已通过 CDN 引入 Iconify
+- 可在 Markdown 中直接写图标标签，例如：
+
+```html
+<iconify-icon icon="mdi:rocket-launch"></iconify-icon>
 ```
 
 ---
